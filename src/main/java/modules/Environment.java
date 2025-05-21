@@ -146,33 +146,23 @@ public class Environment extends EnvironmentImpl {
 
     private void performAction(String currentAction) {
         try {
-            //System.out.println("Action: "+currentAction);
             switch (currentAction) {
                 case "rotate":
-                    System.out.println("rotate");
-                    creature.rotate(1.0);
-                    //CommandUtility.sendSetTurn(creature.getIndex(), -1.0, -1.0, 3.0);
+                    creature.rotate(3.0);
                     break;
                 case "gotoFood":
-                    System.out.println("gotoFood "+food);
                     if (food != null) 
-                        creature.moveto(3.0, food.getX1(), food.getY1());
-                        //CommandUtility.sendGoTo(creature.getIndex(), 3.0, 3.0, food.getX1(), food.getY1());
+                        creature.moveto(4.0, food.getX1(), food.getY1());
                     else creature.move(0.0, 0.0, 0.0);
                     break;
                 case "gotoJewel":
-                    System.out.println("gotoJewel "+leafletJewel);
                     if (leafletJewel != null)
-                        creature.moveto(3.0, leafletJewel.getX1(), leafletJewel.getY1());
-                        //CommandUtility.sendGoTo(creature.getIndex(), 3.0, 3.0, leafletJewel.getX1(), leafletJewel.getY1());
+                        creature.moveto(4.0, leafletJewel.getX1(), leafletJewel.getY1());
                     else creature.move(0.0, 0.0, 0.0);
                     break;                    
                 case "get":
-                    System.out.println("get");
                     creature.move(0.0, 0.0, 0.0);
-                    //CommandUtility.sendSetTurn(creature.getIndex(), 0.0, 0.0, 0.0);
                     if (thingAhead != null) {
-                        System.out.println("Getting "+thingAhead);
                         for (Thing thing : thingAhead) {
                             if (thing.getCategory() == Constants.categoryJEWEL) {
                                 creature.putInSack(thing.getName());
@@ -184,7 +174,6 @@ public class Environment extends EnvironmentImpl {
                     this.resetState();
                     break;
                 default:creature.move(0.0, 0.0, 0.0);
-                    System.out.println("stop");
                     break;
             }
         } catch (Exception e) {
