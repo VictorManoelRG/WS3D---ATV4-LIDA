@@ -5,6 +5,12 @@
 package panels;
 
 import edu.memphis.ccrg.lida.framework.gui.panels.GuiPanelImpl;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.SwingUtilities;
+import modules.Environment;
 
 /**
  *
@@ -17,7 +23,22 @@ public class ActionsPanel extends GuiPanelImpl {
      */
     public ActionsPanel() {
         initComponents();
+        iniciarTimer(); 
     }
+    
+    private void iniciarTimer() {
+    Timer timer = new Timer();
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println(Environment.currentAction);
+            SwingUtilities.invokeLater(() -> {
+                jLabel1.setText(Environment.currentAction);
+            });
+        }
+    };
+    timer.scheduleAtFixedRate(task, 0, 100);
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -28,19 +49,32 @@ public class ActionsPanel extends GuiPanelImpl {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("jLabel1");
+        jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(166, 166, 166)
+                .addComponent(jLabel1)
+                .addContainerGap(188, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(131, 131, 131)
+                .addComponent(jLabel1)
+                .addContainerGap(151, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
