@@ -31,7 +31,6 @@ public class ActionsPanel extends GuiPanelImpl {
     TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            System.out.println(Environment.currentAction);
             SwingUtilities.invokeLater(() -> {
                 jLabel1.setText(Environment.currentAction);
             });

@@ -22,6 +22,7 @@ public class Environment extends EnvironmentImpl {
     private Thing jewel;
     private List<Thing> thingAhead;
     private Thing leafletJewel;
+    private String canCompleteLeaflet="no";
     public static String currentAction;
     
     public Environment() {
@@ -91,6 +92,8 @@ public class Environment extends EnvironmentImpl {
             case "leafletJewel":
                 requestedObject = leafletJewel;
                 break;
+            case "canCompleteLeaflet":
+                requestedObject = canCompleteLeaflet;
             default:
                 break;
         }
@@ -134,6 +137,16 @@ public class Environment extends EnvironmentImpl {
             }
            
         }
+        
+        boolean canComplete = false;
+        for(Leaflet l : creature.getLeaflets()){
+            if(l.isCompleted()){
+                canComplete = true;
+                break;
+            }
+        }
+        
+        canCompleteLeaflet = canComplete ? "yes" : "no";
     }
     
     
@@ -172,6 +185,9 @@ public class Environment extends EnvironmentImpl {
                         }
                     }
                     this.resetState();
+                    break;
+                case "gotoDeliverySpot":
+                    System.out.println("aaaaaaaaaaaaaaaa");
                     break;
                 default:creature.move(0.0, 0.0, 0.0);
                     break;
