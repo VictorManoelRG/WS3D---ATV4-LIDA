@@ -5,6 +5,7 @@ import edu.memphis.ccrg.lida.framework.tasks.FrameworkTaskImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import ws3dproxy.CommandExecException;
 import ws3dproxy.WS3DProxy;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Leaflet;
@@ -61,7 +62,16 @@ public class Environment extends EnvironmentImpl {
     }
 
     private void getDeliverySpotObj() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        try {
+            for (var item : World.getWorldEntities()) {
+                if (item.getCategory() == Constants.categoryDeliverySPOT) {
+                    deliverySpot = item;
+                    break;
+                }
+            }
+        } catch (CommandExecException ex) {
+            System.getLogger(Environment.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
     }
 
     private class BackgroundTask extends FrameworkTaskImpl {
@@ -172,14 +182,29 @@ public class Environment extends EnvironmentImpl {
                     break;
                 case "gotoFood":
                     if (food != null) {
-                        creature.moveto(4.0, food.getX1(), food.getY1());
+                        while (true) {
+                            creature.updateState();
+                            if (creature.calculateDistanceTo(food) <= Constants.OFFSET) {
+                                break;
+                            }
+                            creature.moveto(4.0, food.getX1(), food.getY1());
+                        }
+
                     } else {
                         creature.move(0.0, 0.0, 0.0);
                     }
                     break;
                 case "gotoJewel":
                     if (leafletJewel != null) {
-                        creature.moveto(4.0, leafletJewel.getX1(), leafletJewel.getY1());
+
+                        while (true) {
+                            creature.updateState();
+                            if (creature.calculateDistanceTo(leafletJewel) <= Constants.OFFSET) {
+                                break;
+                            }
+                            creature.moveto(4.0, leafletJewel.getX1(), leafletJewel.getY1());
+                        }
+
                     } else {
                         creature.move(0.0, 0.0, 0.0);
                     }
@@ -204,7 +229,14 @@ public class Environment extends EnvironmentImpl {
                     this.resetState();
                     break;
                 case "gotoDeliverySpot":
-                    creature.moveto(4.0, 200, 200);
+                    while (true) {
+                        creature.updateState();
+                        if (creature.calculateDistanceTo(deliverySpot) <= Constants.OFFSET) {
+                            break;
+                        }
+                        creature.moveto(4.0, deliverySpot.getX1(), deliverySpot.getY1());
+                    }
+
                     break;
                 default:
                     creature.move(0.0, 0.0, 0.0);
