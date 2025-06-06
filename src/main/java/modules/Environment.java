@@ -20,11 +20,12 @@ public class Environment extends EnvironmentImpl {
     private Creature creature;
     private Thing food;
     private Thing jewel;
+    private Thing deliverySpot;
     private List<Thing> thingAhead;
     private Thing leafletJewel;
-    private String canCompleteLeaflet="no";
+    private String canCompleteLeaflet = "no";
     public static String currentAction;
-    
+
     public Environment() {
         this.ticksPerRun = DEFAULT_TICKS_PER_RUN;
         this.proxy = new WS3DProxy();
@@ -41,20 +42,26 @@ public class Environment extends EnvironmentImpl {
         super.init();
         ticksPerRun = (Integer) getParam("environment.ticksPerRun", DEFAULT_TICKS_PER_RUN);
         taskSpawner.addTask(new BackgroundTask(ticksPerRun));
-        
+
         try {
             System.out.println("Reseting the WS3D World ...");
             proxy.getWorld().reset();
             creature = proxy.createCreature(100, 100, 0);
+            World.createDeliverySpot(200, 200);
             creature.start();
             System.out.println("Starting the WS3D Resource Generator ... ");
             World.grow(1);
             Thread.sleep(4000);
             creature.updateState();
+            getDeliverySpotObj();
             System.out.println("DemoLIDA has started...");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void getDeliverySpotObj() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     private class BackgroundTask extends FrameworkTaskImpl {
@@ -100,14 +107,13 @@ public class Environment extends EnvironmentImpl {
         return requestedObject;
     }
 
-    
     public void updateEnvironment() {
         creature.updateState();
         food = null;
         jewel = null;
         leafletJewel = null;
         thingAhead.clear();
-                
+
         for (Thing thing : creature.getThingsInVision()) {
             if (creature.calculateDistanceTo(thing) <= Constants.OFFSET) {
                 // Identifica o objeto proximo
@@ -116,9 +122,9 @@ public class Environment extends EnvironmentImpl {
             } else if (thing.getCategory() == Constants.categoryJEWEL) {
                 if (leafletJewel == null) {
                     // Identifica se a joia esta no leaflet
-                    for(Leaflet leaflet: creature.getLeaflets()){
-                        if (leaflet.ifInLeaflet(thing.getMaterial().getColorName()) &&
-                                leaflet.getTotalNumberOfType(thing.getMaterial().getColorName()) > leaflet.getCollectedNumberOfType(thing.getMaterial().getColorName())){
+                    for (Leaflet leaflet : creature.getLeaflets()) {
+                        if (leaflet.ifInLeaflet(thing.getMaterial().getColorName())
+                                && leaflet.getTotalNumberOfType(thing.getMaterial().getColorName()) > leaflet.getCollectedNumberOfType(thing.getMaterial().getColorName())) {
                             leafletJewel = thing;
                             break;
                         }
@@ -128,29 +134,28 @@ public class Environment extends EnvironmentImpl {
                     jewel = thing;
                 }
             } else if (food == null && creature.getFuel() <= 300.0
-                        && (thing.getCategory() == Constants.categoryFOOD
-                        || thing.getCategory() == Constants.categoryPFOOD
-                        || thing.getCategory() == Constants.categoryNPFOOD)) {
-                
-                    // Identifica qualquer tipo de comida
-                    food = thing;
+                    && (thing.getCategory() == Constants.categoryFOOD
+                    || thing.getCategory() == Constants.categoryPFOOD
+                    || thing.getCategory() == Constants.categoryNPFOOD)) {
+
+                // Identifica qualquer tipo de comida
+                food = thing;
             }
-           
+
         }
-        
+
         boolean canComplete = false;
-        for(Leaflet l : creature.getLeaflets()){
-            if(l.isCompleted()){
+        for (Leaflet l : creature.getLeaflets()) {
+            if (isLeafletCompleted(l)) {
+                System.out.println("COMPLETO\n\n");
                 canComplete = true;
                 break;
             }
         }
-        
-        canCompleteLeaflet = canComplete ? "yes" : "no";
+
+        canCompleteLeaflet = canComplete && thingAhead.isEmpty() ? "yes" : "no";
     }
-    
-    
-    
+
     @Override
     public void processAction(Object action) {
         String actionName = (String) action;
@@ -159,20 +164,26 @@ public class Environment extends EnvironmentImpl {
 
     private void performAction(String currentAction) {
         try {
+            System.out.println("AÇÃO: " + currentAction + "\n\nÃ");
             switch (currentAction) {
                 case "rotate":
                     creature.rotate(3.0);
+
                     break;
                 case "gotoFood":
-                    if (food != null) 
+                    if (food != null) {
                         creature.moveto(4.0, food.getX1(), food.getY1());
-                    else creature.move(0.0, 0.0, 0.0);
+                    } else {
+                        creature.move(0.0, 0.0, 0.0);
+                    }
                     break;
                 case "gotoJewel":
-                    if (leafletJewel != null)
+                    if (leafletJewel != null) {
                         creature.moveto(4.0, leafletJewel.getX1(), leafletJewel.getY1());
-                    else creature.move(0.0, 0.0, 0.0);
-                    break;                    
+                    } else {
+                        creature.move(0.0, 0.0, 0.0);
+                    }
+                    break;
                 case "get":
                     creature.move(0.0, 0.0, 0.0);
                     if (thingAhead != null) {
@@ -181,19 +192,43 @@ public class Environment extends EnvironmentImpl {
                                 creature.putInSack(thing.getName());
                             } else if (thing.getCategory() == Constants.categoryFOOD || thing.getCategory() == Constants.categoryNPFOOD || thing.getCategory() == Constants.categoryPFOOD) {
                                 creature.eatIt(thing.getName());
+                            } else if (thing.getCategory() == Constants.categoryDeliverySPOT) {
+                                for (Leaflet l : creature.getLeaflets()) {
+                                    if (isLeafletCompleted(l)) {
+                                        creature.deliverLeaflet(l.getID().toString());
+                                    }
+                                }
                             }
                         }
                     }
                     this.resetState();
                     break;
                 case "gotoDeliverySpot":
-                    System.out.println("aaaaaaaaaaaaaaaa");
+                    creature.moveto(4.0, 200, 200);
                     break;
-                default:creature.move(0.0, 0.0, 0.0);
+                default:
+                    creature.move(0.0, 0.0, 0.0);
                     break;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isLeafletCompleted(Leaflet l) {
+        boolean completed = true;
+        var items = l.getItems();
+        for (var i : items.entrySet()) {
+            var array = i.getValue();
+            int required = array[0];
+            int collected = array[1];
+
+            if (required > collected) {
+                completed = false;
+                break;
+            }
+
+        }
+        return completed;
     }
 }
