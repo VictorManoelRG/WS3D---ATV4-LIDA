@@ -132,12 +132,18 @@ public class Environment extends EnvironmentImpl {
             } else if (thing.getCategory() == Constants.categoryJEWEL) {
                 if (leafletJewel == null) {
                     // Identifica se a joia esta no leaflet
+                    boolean found = false;
                     for (Leaflet leaflet : creature.getLeaflets()) {
                         if (leaflet.ifInLeaflet(thing.getMaterial().getColorName())
                                 && leaflet.getTotalNumberOfType(thing.getMaterial().getColorName()) > leaflet.getCollectedNumberOfType(thing.getMaterial().getColorName())) {
                             leafletJewel = thing;
+                            found = true;
                             break;
                         }
+                    }
+
+                    if (!found) {
+                        leafletJewel = thing;
                     }
                 } else {
                     // Identifica a joia que nao esta no leaflet
